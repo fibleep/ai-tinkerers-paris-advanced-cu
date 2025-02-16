@@ -9,6 +9,6 @@ This project segments the video into 15-second chunks, further divided into 1-se
 Doppelganger provides a Streamlit dashboard to upload local videos or download from YouTube.
 Run the Application:
 ```
-streamlit run app.py
+streamlit run app/app.py
 ```
 Our demo automates a daily routine of checking AI news, where the agent learns from the video which sites to visit and the exact workflow to follow, demonstrating automated few-shot prompting and planning for computer use agents.
