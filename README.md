@@ -4,5 +4,5 @@ This project converts a tutorial video into step-by-step executable instructions
 
 Run the Application:
 ```
-streamlit run app/app.py
+streamlit run app.py
 ```
