@@ -50,6 +50,9 @@ Make sure that it's generic! It should capture the general action, that will be 
 Your output is an xml structure between <xml> and </xml> tags.
 
 An example is:
+<reasoning>
+...
+</reasoning>
 <xml>
 <step>
     <description>
@@ -71,13 +74,15 @@ An example is:
 </step>
 </xml>
 
-You should make this as robust as possible!
+You should make this as robust as possible! Be super specific, include the urls, the name of the software etc
+
+Find names of the websites, software, clients - if you can't find it you will be punished
 
 Return your output between <xml> and </xml> tags.
 
 Here is your input:
 
-Audio transcription:
+Audio transcription (Be mindful of artifacts, this won't be perfect!):
 {audio_text}
 
 Image descriptions:
@@ -116,14 +121,61 @@ Be as robust as possible!
 This is guidance for a computer use agent, it should detail what it should look for on a page and how it should interact with it
 Include links, the logical actions and the core of what's happening in the steps
 
+Describe the software that's being used and the tasks that's being achieved
+
 Return your output between <xml> and </xml> tags.
 
 Try to avoid terminal use as much as possible, it's better to use a GUI.
+
+This description should always be actionable for the LLM, it should be able to understand what to do.
 
 Here are the steps of the requested action:
 {steps}
 """
 
+_ENHANCE_STEPS_PROMPT = """
+You are a helpful assistant that enhances steps from a segment of a video.
+
+You are given a list of steps and you need to enhance them.
+
+Based on the general description, you need to make the provided step more specific at what it needs to do
+
+Here is the general description:
+{general_description}
+
+Here is the step:
+{step}
+
+
+An example is:
+<xml>
+<step>
+    <description>
+            The user is on the home page of a website, the intent is to login
+            The site is https://www.google.com
+    </description>
+    <steps>
+        <step>
+            <referenced_frames>
+                1, 2, 3
+            </referenced_frames>
+            <description>
+                The user clicks on the login button, the url is https://www.google.com, the login button is labeled "Login", it's a button with a plus icon, 
+                it's blue and in the top right corner of the page
+                They are redirected to the login page
+            </description>
+        </step>
+    </steps>
+</step>
+</xml>
+
+You should make this as robust as possible! Be super specific, include the urls, the name of the software etc
+
+Use all the existing links in there!
+
+Return your output between <xml> and </xml> tags.
+
+"""
 
 def _encode_image(image_path: str) -> str:
     """Encode image to base64."""
@@ -193,6 +245,7 @@ def _process_segment(segment: Dict) -> tuple[str, str, List[str]]:
     print(f"Transcribed audio: {audio_text}")
 
     image_descriptions = []
+    print(f"SEGMENT: {segment}")
     for idx, image in enumerate(segment["images"]):
         res = _call(_DESCRIBE_IMAGE_PROMPT, image)
         res = res.replace("\n", "")
@@ -258,15 +311,15 @@ def process_video_segments(segments_path: str, limit: Optional[int] = None) -> s
         audio_file = os.path.join(segment_path, "audio.mp3")
 
         # Get sorted image files
+        # Get sorted image files
         image_files = sorted(
-            [
-                os.path.join(segment_path, f)
-                for f in os.listdir(segment_path)
-                if f.endswith((".png", ".jpg", ".jpeg"))
-                and os.path.isfile(os.path.join(segment_path, f))
-            ]
-        )
-
+    [
+        os.path.join(segment_path, "frames", f)  # Add "frames" subdirectory
+        for f in os.listdir(os.path.join(segment_path, "frames"))  # Look in frames directory
+        if f.endswith((".png", ".jpg", ".jpeg"))
+        and os.path.isfile(os.path.join(segment_path, "frames", f))
+    ]
+)
         # Add segment to knowledge base
         segment_data = {"audio": audio_file, "images": image_files}
         knowledge_base.append(segment_data)
@@ -275,6 +328,7 @@ def process_video_segments(segments_path: str, limit: Optional[int] = None) -> s
     segment_results = []
     for segment in knowledge_base:
         res, audio_text, image_descriptions = _process_segment(segment)
+        print(f"RES: {res} + IMAGE DESCS: {image_descriptions}")
         segment_results.append(res)
 
     # Create general tool description
@@ -286,6 +340,16 @@ def process_video_segments(segments_path: str, limit: Optional[int] = None) -> s
         if "<xml>" in general_description
         else general_description
     )
+    
+    # new_segments = []
+    # for segment in segment_results:
+    #     res = _call(
+    #         _ENHANCE_STEPS_PROMPT.format(
+    #             general_description=general_description,
+    #             step=segment
+    #         )
+    #     )
+    #     new_segments.append(res)
 
     # Create final XML
     final_xml = _final_xml_creation(general_description, "\n".join(segment_results))
@@ -295,5 +359,5 @@ def process_video_segments(segments_path: str, limit: Optional[int] = None) -> s
 
 if __name__ == "__main__":
     # Example usage
-    result = process_video_segments("ingestor/video_parts", limit=3)
+    result = process_video_segments("ingestor/video_parts", limit=4)
     print(result)
