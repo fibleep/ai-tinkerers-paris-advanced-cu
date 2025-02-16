@@ -1,8 +1,11 @@
 # DoppelGanger
+Doppelganger takes a tutorial video of user actions with narration and transforms it into actionable steps for an Anthropic Claude Computer Use agent to follow, automating repetitive tasks like employee onboarding, data entry, and quality assurance.
 
-This project converts a tutorial video into step-by-step executable instructions for your PC by segmenting the video, transcribing audio with Whisper for high-precision transcription, analyzing key visual elements, and generating a detailed XML file using Anthropic Claude via LangChain to outline and execute each action automatically.It then creates an instance of Anthropic Claude Computer Use that reproduces the tutorial directly on your PC. It then creates an instance of Anthropic Claude Computer Use that reproduces the tutorial directly on your PC.
+This project segments the video into 15-second chunks, further divided into 1-second chunks. Whisper is used locally for accurate audio transcription, and Sonnet 3.5 handles all LLM calls. The agent summarizes 1-second segments, composes them into 15-second summaries, and finally generates an overall plan. LangChain generates a detailed XML outlining each action, executed by an Anthropic Claude Computer Use instance on your PC.
 
+Doppelganger provides a Streamlit dashboard to upload local videos or download from YouTube.
 Run the Application:
 ```
 streamlit run app.py
 ```
+Our demo automates a daily routine of checking AI news, where the agent learns from the video which sites to visit and the exact workflow to follow, demonstrating automated few-shot prompting and planning for computer use agents.
