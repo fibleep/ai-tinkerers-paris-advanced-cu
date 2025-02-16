@@ -1,0 +1,14 @@
+[project]
+name = "paris-hackathon"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "ffmpeg>=1.4",
+    "moviepy>=2.1.2",
+    "opencv-python>=4.11.0.86",
+    "python-dotenv>=1.0.1",
+    "pytube>=15.0.0",
+    "yt-dlp>=2025.1.26",
+]
