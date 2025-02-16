@@ -12,3 +12,14 @@ Run the Application:
 streamlit run app.py
 ```
 Our demo automates a daily routine of checking AI news, where the agent learns from the video which sites to visit and the exact workflow to follow, demonstrating automated few-shot prompting and planning for computer use agents.
+
+
+# Increasing Streamlit Upload Size
+
+1. go to `~/.streamlit`
+2. create a file called 'config.toml'
+3. add
+```
+[server]
+maxUploadSize = 1000
+```
