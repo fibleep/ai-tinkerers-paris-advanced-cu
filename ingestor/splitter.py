@@ -64,7 +64,3 @@ def process_video(url, output_folder="video_parts"):
     # Cleanup original video
     os.remove(f"{output_folder}/video.mp4")
     print("Processing complete!")
-
-# Example usage
-url = "https://youtu.be/nIYLT3HW-0Y"
-process_video(url)
