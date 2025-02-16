@@ -8,32 +8,41 @@ import time
 def main():
     st.title("Advanced CU")
     st.write("This tool will:")
-    st.write("1. Download the video")
+    st.write("1. Download or upload the video")
     st.write("2. Split it into 15-second segments")
     st.write("3. Extract frames (1 FPS) and audio from each segment")
     st.write("4. Instruct our agent to replicate what's been done")
     
-    # Input for video URL
-    video_url = st.text_input("Video URL (YouTube or other supported platforms)")
+    # Input method selection
+    input_method = st.radio("Choose input method:", ["YouTube URL", "Local File"])
+    
+    # Input based on selection
+    video_input = None
+    if input_method == "YouTube URL":
+        video_url = st.text_input("Video URL (YouTube)")
+        if video_url:
+            video_input = video_url
+    else:
+        uploaded_file = st.file_uploader("Choose a video file", type=['mp4', 'avi', 'mov', 'mkv'])
+        if uploaded_file:
+            video_input = uploaded_file
     
     # Input for output directory
     output_dir = "../ingestor/video_parts"
     
     if st.button("Process Video"):
-        if video_url:
+        if video_input:
             try:
                 # Create progress placeholder
                 progress_text = st.empty()
-                
-                # Create a progress bar
                 progress_bar = st.progress(0)
                 
                 # Process the video with progress updates
-                progress_text.text("Downloading video...")
+                progress_text.text("Processing video...")
                 progress_bar.progress(10)
                 
                 # Call the process_video function
-                process_video(video_url, output_dir)
+                process_video(video_input, output_dir)
                 
                 # Update progress
                 progress_bar.progress(100)
@@ -60,13 +69,11 @@ def main():
                                     st.image(os.path.join(frames_dir, frame), 
                                            caption=f"Frame {idx+1}",
                                            use_container_width=True)
-                # add next part here
-
                 
             except Exception as e:
                 st.error(f"An error occurred: {str(e)}")
         else:
-            st.error("Please enter a video URL")
+            st.error("Please provide a video input (URL or file)")
 
 if __name__ == "__main__":
     main()

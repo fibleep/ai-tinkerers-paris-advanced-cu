@@ -1,24 +1,45 @@
 import os
 import subprocess
+from urllib.parse import urlparse
 
-def process_video(url, output_folder="video_parts"):
+def is_youtube_url(url):
+    """Check if the provided path is a YouTube URL"""
+    try:
+        result = urlparse(url)
+        return all([result.scheme, result.netloc]) and ('youtube.com' in result.netloc or 'youtu.be' in result.netloc)
+    except:
+        return False
+
+def process_video(input_path, output_folder="video_parts"):
+    """
+    Process either a YouTube URL or local video file
+    input_path: Can be either a YouTube URL or a FileUploader object
+    output_folder: Directory where processed files will be stored
+    """
     # Create output directory
     os.makedirs(output_folder, exist_ok=True)
     
-    # Download video using yt-dlp
-    print("Downloading video...")
-    subprocess.run([
-        "yt-dlp",
-        "-f", "best",
-        "-o", f"{output_folder}/video.mp4",
-        url
-    ])
+    # Determine if input is YouTube URL or local file
+    video_path = os.path.join(output_folder, "video.mp4")
+    if isinstance(input_path, str) and is_youtube_url(input_path):
+        print("Downloading YouTube video...")
+        subprocess.run([
+            "yt-dlp",
+            "-f", "best",
+            "-o", video_path,
+            input_path
+        ])
+    else:
+        # For uploaded files
+        print("Processing uploaded video...")
+        with open(video_path, "wb") as f:
+            f.write(input_path.read())
     
     # Split into 15-second segments
     print("Splitting video and audio...")
     subprocess.run([
         "ffmpeg",
-        "-i", f"{output_folder}/video.mp4",
+        "-i", video_path,
         "-f", "segment",
         "-segment_time", "15",
         "-reset_timestamps", "1",
@@ -62,5 +83,5 @@ def process_video(url, output_folder="video_parts"):
         os.remove(segment_path)
     
     # Cleanup original video
-    os.remove(f"{output_folder}/video.mp4")
+    os.remove(video_path)
     print("Processing complete!")
