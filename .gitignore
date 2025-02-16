@@ -9,5 +9,8 @@ wheels/
 # Virtual environments
 .venv
 .env
-ingestor/video_part
+ingestor/video_parts/
 claude-computer-use-macos/screenshots
+
+# langchain
+.langchain.db
